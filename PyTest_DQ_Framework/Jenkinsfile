@@ -1,0 +1,74 @@
+pipeline {
+    agent any
+     environment {
+        POSTGRES_SECRET_USR = credentials('postgres-username')
+        POSTGRES_SECRET_PSW = credentials('postgres-password')
+        PARQUET_BASE_PATH = '/parquet_data'
+    }
+    stages {
+        stage('Update Packages') {
+            steps {
+                script {
+                    sh 'apt-get update'
+                    sh 'apt-get install -y libpq-dev'
+                }
+            }
+        }
+        stage('Install Python') {
+            steps {
+                sh 'apt-get install -y python3 python3-pip python3-venv'
+            }
+        }
+        stage('Clone Repository') {
+            steps {
+                script {
+                    git branch: 'main', url: 'https://github.com/unreq-f/dqe-automation'
+                }
+            }
+        }
+        stage('Install Dependencies') {
+            steps {
+                script {
+                    sh '''
+                        python3 -m venv venv
+                        . venv/bin/activate
+                        pip install -r PyTest_DQ_Framework/requirements.txt
+                        pip install pytest pytest-html
+                    '''
+                }
+            }
+        }
+        stage('Run Smoke') {
+            steps {
+                script {
+                   sh '''
+                    . venv/bin/activate
+                    export PYTHONPATH=$WORKSPACE
+                    pytest PyTest_DQ_Framework/tests \
+                    --db_host="postgres" \
+                     --db_port="5432" \
+                      --db_name="mydatabase" \
+                    --db_user="$POSTGRES_SECRET_USR" \
+                   --db_password="$POSTGRES_SECRET_PSW" \
+                   -m smoke \
+                  --html=PyTest_DQ_Framework/generated_report/pytest_smoke.html
+                     '''
+                }
+            }
+        }
+    }
+post {
+    always {
+        echo 'Pipeline execution completed.'
+        archiveArtifacts artifacts: 'PyTest_DQ_Framework/generated_report/pytest_*.html,PyTest_DQ_Framework/generated_report/assets/**'
+    }
+    success {
+        echo 'Pipeline executed successfully!'
+    }
+    failure {
+        echo 'Pipeline failed. Please check the logs for details.'
+    }
+}
+}
+
+
