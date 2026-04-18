@@ -2,6 +2,7 @@ import pytest
 from src.connectors.postgres.postgres_connector import PostgresConnectorContextManager
 from src.data_quality.data_quality_validation_library import DataQualityLibrary
 from src.connectors.file_system.parquet_reader import LocalParquetConnector
+import os
 
 def pytest_addoption(parser):
     parser.addoption("--db_host", action="store", default="localhost", help="Database host")
@@ -37,7 +38,7 @@ def db_connection(request):
 
 @pytest.fixture(scope='session')
 def parquet_data_factory():
-    base_path = 'src/parquet_data'
+    base_path = os.environ.get('PARQUET_BASE_PATH', 'src/parquet_data')
     connector = LocalParquetConnector(base_path)
 
     def _reader(table_name: str, filters=None):
