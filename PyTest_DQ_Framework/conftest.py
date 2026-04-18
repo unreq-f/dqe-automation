@@ -38,7 +38,7 @@ def db_connection(request):
 
 @pytest.fixture(scope='session')
 def parquet_data_factory():
-    base_path = os.environ.get('PARQUET_BASE_PATH', 'src/parquet_data')
+    base_path = os.environ.get('PARQUET_BASE_PATH', 'PyTest_DQ_Framework/src/parquet_data')
     connector = LocalParquetConnector(base_path)
 
     def _reader(table_name: str, filters=None):
