@@ -2,7 +2,7 @@ import pytest
 import pandas as pd
 
 # Fixture to read the CSV file
-@pytest.fixture(scope= "session",params=["src\\data\\data.csv"])
+@pytest.fixture(scope= "session",params=["C:\\Users\\vladyslav_yevtushenk\\dqe_automation\\dqe-automation\\PyTest_Introduction\\src\\data\\data.csv"])
 def load_csv(request):
     return pd.read_csv(request.param)
 
