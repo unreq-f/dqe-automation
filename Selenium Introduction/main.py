@@ -44,19 +44,15 @@ if __name__ == "__main__":
             lst = [row.text for row in rows if row.text != by_xpath.text]
             data[by_xpath.text] = lst
         df = pd.DataFrame(data)
-        df.to_csv(r'output.csv', index=False)
-        filters = driver.find_element(By.CLASS_NAME, "groups")
-        buttons = filters.find_elements(By.CLASS_NAME, "legendtoggle")
-        for i in range(len(buttons)):
-            filters = driver.find_element(By.CLASS_NAME, "groups")
-            buttons = filters.find_elements(By.CLASS_NAME, "legendtoggle")
-            button = buttons[i]
-            button.click()
+        df.to_csv(r'table.csv', index=False)
+        filters = driver.find_elements(By.CLASS_NAME, "traces")
+        for i, filter in enumerate(filters):
+            WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.CLASS_NAME, "traces")))
+            button = filter.find_element(By.CLASS_NAME, "legendtoggle")
             WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.CLASS_NAME, "trace")))
             doughnut = driver.find_element(By.CLASS_NAME, "trace")
             doughnut.screenshot(f"screenshot{i}.png")
             try:
-                WebDriverWait(doughnut, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, 'text.slicetext[data-notex="1"]')))
                 slices = doughnut.find_elements(By.CSS_SELECTOR, 'text.slicetext[data-notex="1"]')
                 all_rows = []
                 for slice in slices:
@@ -66,6 +62,7 @@ if __name__ == "__main__":
                 print(all_rows)
                 df = pd.DataFrame(all_rows, columns=['Facility Type', 'Min Average Time Spent'])
                 df.to_csv(f'doughnut{i}.csv', index=False)
+                button.click()
             except NoSuchElementException:
                 print("Элементы slicetext не найдены после фильтра.")
 
