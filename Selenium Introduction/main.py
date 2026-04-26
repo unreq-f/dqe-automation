@@ -46,13 +46,16 @@ if __name__ == "__main__":
         df = pd.DataFrame(data)
         df.to_csv(r'table.csv', index=False)
         filters = driver.find_elements(By.CLASS_NAME, "traces")
-        for i, filter in enumerate(filters):
+        for i in range(len(filters)):
+            filters = driver.find_elements(By.CLASS_NAME, "traces")
+            active_filters = [el for el in filters if el.value_of_css_property("opacity") == "1"]
             WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.CLASS_NAME, "traces")))
-            button = filter.find_element(By.CLASS_NAME, "legendtoggle")
+            button = active_filters[0].find_element(By.CLASS_NAME, "legendtoggle")
             WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.CLASS_NAME, "trace")))
             doughnut = driver.find_element(By.CLASS_NAME, "trace")
             doughnut.screenshot(f"screenshot{i}.png")
             try:
+                WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, 'text.slicetext[data-notex="1"]')))
                 slices = doughnut.find_elements(By.CSS_SELECTOR, 'text.slicetext[data-notex="1"]')
                 all_rows = []
                 for slice in slices:
@@ -63,6 +66,10 @@ if __name__ == "__main__":
                 df = pd.DataFrame(all_rows, columns=['Facility Type', 'Min Average Time Spent'])
                 df.to_csv(f'doughnut{i}.csv', index=False)
                 button.click()
+                WebDriverWait(driver, 10).until(
+                    EC.visibility_of_element_located((By.CLASS_NAME, "trace"))
+                )
+                time.sleep(3)
             except NoSuchElementException:
                 print("Элементы slicetext не найдены после фильтра.")
 
