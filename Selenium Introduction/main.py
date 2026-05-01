@@ -29,7 +29,7 @@ class SeleniumWebDriverContextManager:
 
 
 if __name__ == "__main__":
-    with SeleniumWebDriverContextManager(driver_path= r'C:\Users\vladyslav_yevtushenk\dqe_automation\dqe-automation\Selenium Introduction\chromedriver-win64\chromedriver.exe') as driver:
+    with SeleniumWebDriverContextManager(driver_path= os.path.abspath(r"chromedriver-win64\chromedriver.exe")) as driver:
         #task1
         path = os.path.abspath("report.html")
         driver.get(path)
