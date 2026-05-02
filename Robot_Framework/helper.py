@@ -36,7 +36,7 @@ def read_html_table_to_dataframe(html_path, driver_path):
 def read_partitioned_parquet(base_path, table_name):
     table_path = pathlib.Path(base_path) / table_name
     if not table_path.exists():
-        raise FileNotFoundError(f"Путь {table_path} не найден")
+        raise FileNotFoundError(f"path {table_path} not found")
     df = pd.read_parquet(table_path, engine='pyarrow')
     return df
 
@@ -48,7 +48,7 @@ def filter_dataframe(df, column, value):
 def compare_dataframes_and_return_diff(df1, df2):
     try:
         pd.testing.assert_frame_equal(df1, df2)
-        return None  # Совпадают
+        return None
     except AssertionError as e:
         diff = df1.compare(df2)
         return diff
@@ -56,6 +56,6 @@ def compare_dataframes_and_return_diff(df1, df2):
 def read_single_partition(base_path, table_name, partition_value):
     partition_path = pathlib.Path(base_path) / table_name / f"partition_date={partition_value}"
     if not partition_path.exists():
-        raise FileNotFoundError(f"Путь {partition_path} не найден")
+        raise FileNotFoundError(f"path {partition_path} not found")
     df = pd.read_parquet(partition_path, engine='pyarrow')
     return df
